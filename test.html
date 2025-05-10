@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>MBTI 性格测试</title>
+    <style>
+        body { font-family: "微软雅黑", Arial, sans-serif; background: #f5f6fa; margin: 0; padding: 0; }
+        .container { max-width: 650px; margin: 40px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px #ccc; padding: 30px; }
+        h1 { text-align: center; color: #273c75; }
+        .question { margin: 20px 0; }
+        .options label { display: block; margin: 8px 0; cursor: pointer; }
+        .btn { display: block; width: 100%; padding: 12px; background: #273c75; color: #fff; border: none; border-radius: 5px; font-size: 18px; cursor: pointer; margin-top: 20px; }
+        .btn:hover { background: #40739e; }
+        .result { text-align: center; font-size: 22px; color: #44bd32; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MBTI 性格测试</h1>
+        <form id="mbtiForm"></form>
+        <div class="result" id="result"></div>
+    </div>
+    <script>
+        // 题库
+        const questions = [
+            { q: "你更喜欢：", a: "和很多人在一起，参加热闹的聚会", b: "和几位好友安静地相处", type: "EI" },
+            { q: "遇到新问题时，你通常：", a: "依靠自己的经验和现实情况", b: "想象各种可能性和未来发展", type: "SN" },
+            { q: "做决定时，你更看重：", a: "逻辑和客观事实", b: "个人感受和他人情绪", type: "TF" },
+            { q: "你更喜欢：", a: "有计划、有条理地安排生活", b: "灵活应变，随遇而安", type: "JP" },
+            { q: "你在社交场合中：", a: "喜欢主动与人交谈", b: "更喜欢倾听和观察", type: "EI" },
+            { q: "你更信任：", a: "具体的信息和细节", b: "灵感和直觉", type: "SN" },
+            { q: "你认为自己更擅长：", a: "分析和推理", b: "理解和关心他人", type: "TF" },
+            { q: "你更喜欢：", a: "提前做计划", b: "随机应变", type: "JP" },
+            { q: "你更容易感到充实的是：", a: "与朋友一起外出活动", b: "独自一人安静休息", type: "EI" },
+            { q: "你更关注：", a: "现实和现有的事物", b: "未来和可能性", type: "SN" },
+            { q: "你更倾向于：", a: "公正无私地处理问题", b: "体谅他人的感受", type: "TF" },
+            { q: "你喜欢的工作方式是：", a: "按部就班，按计划进行", b: "灵活处理，随时调整", type: "JP" },
+            { q: "你在新环境中：", a: "很快与人打成一片", b: "需要时间适应和观察", type: "EI" },
+            { q: "你更喜欢：", a: "具体明确的指示", b: "自由发挥的空间", type: "SN" },
+            { q: "你更看重：", a: "事实和数据", b: "价值观和意义", type: "TF" },
+            { q: "你更喜欢：", a: "事情有明确的结论", b: "保持开放的可能性", type: "JP" }
+        ];
+
+        // 选项分值：A端极端同意，B端极端不同意
+        const options = [
+            { text: "非常符合前者", value: 2 },
+            { text: "比较符合前者", value: 1 },
+            { text: "比较符合后者", value: -1 },
+            { text: "非常符合后者", value: -2 }
+        ];
+
+        // 渲染题目
+        const form = document.getElementById('mbtiForm');
+        questions.forEach((item, idx) => {
+            const div = document.createElement('div');
+            div.className = 'question';
+            div.innerHTML = `
+                <div><b>第${idx + 1}题：</b>${item.q}</div>
+                <div style="margin: 6px 0 6px 0; color: #888;">A. ${item.a}　|　B. ${item.b}</div>
+                <div class="options">
+                    ${options.map((opt, i) => `
+                        <label>
+                            <input type="radio" name="q${idx}" value="${opt.value}" required>
+                            ${opt.text}
+                        </label>
+                    `).join('')}
+                </div>
+            `;
+            form.appendChild(div);
+        });
+
+        // 提交按钮
+        form.innerHTML += `<button class="btn" type="submit">提交测试</button>`;
+
+        // 计算分数
+        form.onsubmit = function(e) {
+            e.preventDefault();
+            let EI = 0, SN = 0, TF = 0, JP = 0;
+            questions.forEach((item, idx) => {
+                const val = parseInt(form['q'+idx].value);
+                if(item.type === "EI") EI += val;
+                if(item.type === "SN") SN += val;
+                if(item.type === "TF") TF += val;
+                if(item.type === "JP") JP += val;
+            });
+            let result = '';
+            result += EI >= 0 ? 'E' : 'I';
+            result += SN >= 0 ? 'S' : 'N';
+            result += TF >= 0 ? 'T' : 'F';
+            result += JP >= 0 ? 'J' : 'P';
+            // MBTI类型解析
+            const mbtiDescriptions = {
+                'ISTJ': '严谨务实，责任心强，注重细节，喜欢有条理的生活和工作。',
+                'ISFJ': '温和体贴，乐于助人，重视传统，善于照顾他人。',
+                'INFJ': '富有洞察力，理想主义，关心他人，追求意义和价值。',
+                'INTJ': '独立自主，逻辑性强，善于规划，喜欢创新和挑战。',
+                'ISTP': '冷静客观，动手能力强，喜欢分析和解决实际问题。',
+                'ISFP': '温柔随和，感性细腻，享受当下，注重个人体验。',
+                'INFP': '理想主义，富有同情心，追求内心和谐与自我实现。',
+                'INTP': '理性思考，喜欢探索理论，追求真理和逻辑。',
+                'ESTP': '果断灵活，喜欢冒险，善于应对突发状况。',
+                'ESFP': '活泼开朗，乐于交际，享受生活，喜欢带来欢乐。',
+                'ENFP': '充满热情，富有创造力，善于激励他人，追求自由。',
+                'ENTP': '机智幽默，善于辩论，喜欢创新和挑战权威。',
+                'ESTJ': '务实高效，组织能力强，喜欢制定规则和计划。',
+                'ESFJ': '热心助人，善于协调，重视团队合作和人际关系。',
+                'ENFJ': '富有同理心，善于沟通，乐于引导和帮助他人。',
+                'ENTJ': '果断自信，领导能力强，善于制定和实现目标。'
+            };
+            const desc = mbtiDescriptions[result] || '暂无该类型的详细说明。';
+            document.getElementById('result').innerHTML = `你的MBTI类型是：<b>${result}</b><br><br><span style="font-size:18px;color:#333;">${desc}</span>`;
+            window.scrollTo(0, document.body.scrollHeight);
+        }
+    </script>
+</body>
+</html>
